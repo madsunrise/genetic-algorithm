@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static com.rudnev.Main.INFINITY;
+
 /**
  * Created by ivan on 17.12.2017.
  */
 class Chromosome {
     private final List<Integer> gens;
     private final Random random = new Random();
-    private final int SELF_VALUE = 100000;
 
     Chromosome(int gensCount) {
         gens = new ArrayList<>(gensCount);
@@ -38,7 +39,7 @@ class Chromosome {
     }
 
     int getValue(List<List<Integer>> graph) {
-        int value = SELF_VALUE;
+        int value = INFINITY;
         for (int i = 0; i < gens.size() - 1; ++i) {
             int temp = graph.get(gens.get(i)).get(gens.get(i + 1));
             if (temp < value) {

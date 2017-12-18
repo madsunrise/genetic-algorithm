@@ -15,38 +15,31 @@ class GeneticUtils {
         this.graph = graph;
     }
 
-    private void printPopulation() {
-        for (Chromosome chromosome : population) {
-            System.out.println(chromosome.getGens());
+    void runGeneticAlgorithm(int iterations, int populationCount, int sender, int receiver) {
+        for (int i = 0; i < iterations; ++i) {
+            runIteration(populationCount, sender, receiver);
         }
     }
 
-    void runGeneticAlgorithm(
-            int iterations,
-            int populationCount,
-            int sender,
-            int receiver) {
-        for (int i = 0; i < iterations; ++i) {
-            if (population.isEmpty()) {
-                population = createInitialPopulation(populationCount, graph.size(), sender, receiver);
-            } else {
-                population = rouletteSelection(population);
-            }
-
-
-            reproduction(populationCount);
-            createMutations();
-
-            int max = 0;
-            for (Chromosome chromosome : population) {
-                int value = chromosome.getValue(graph);
-                if (max < value) {
-                    max = value;
-                }
-            }
-
-            System.out.println("Population throughput: " + max);
+    void runIteration(int populationCount, int sender, int receiver) {
+        if (population.isEmpty()) {
+            population = createInitialPopulation(populationCount, graph.size(), sender, receiver);
+        } else {
+            population = tournamentSelection(population);
         }
+
+        reproduction(populationCount);
+        createMutations();
+
+        int max = 0;
+        for (Chromosome chromosome : population) {
+            int value = chromosome.getValue(graph);
+            if (max < value) {
+                max = value;
+            }
+        }
+
+        System.out.println("Population throughput: " + max);
     }
 
     private List<Chromosome> createInitialPopulation(int count, int computersCount, int sender, int receiver) {
@@ -58,31 +51,18 @@ class GeneticUtils {
     }
 
 
-    private List<Chromosome> rouletteSelection(List<Chromosome> oldPopulation) {
-        int bestCount = (int) (pBest * oldPopulation.size());
-        oldPopulation.sort(Comparator.comparingInt(a -> a.getValue(graph)));
-
-        List<Chromosome> result = new ArrayList<>(oldPopulation.subList(0, bestCount));
-        while (result.size() <= (int) (ALIVE_PROPOTION * oldPopulation.size())) {
-            int sumFit = 0;
-            for (Chromosome chromosome : oldPopulation) {
-                sumFit += chromosome.getValue(graph);
+    private List<Chromosome> tournamentSelection(List<Chromosome> oldPopulation) {
+        int resultSize = (int) (oldPopulation.size() * ALIVE_PROPOTION);
+        List<Chromosome> result = new ArrayList<>();
+        for (int i = 0; i < resultSize; ++i) {
+            Chromosome a = oldPopulation.get(random.nextInt(oldPopulation.size()));
+            Chromosome b = oldPopulation.get(random.nextInt(oldPopulation.size()));
+            if (a.getValue(graph) < b.getValue(graph)) {
+                result.add(a);
             }
-
-            int rouletPos = random.nextInt(sumFit);
-            int rouletPosForMember = oldPopulation.get(0).getValue(graph);
-
-            int removeAt = -1;
-            for (int i = 0; i < oldPopulation.size(); ++i) {
-                Chromosome chromosome = oldPopulation.get(i);
-                if (rouletPos < rouletPosForMember) {
-                    result.add(chromosome);
-                    removeAt = i;
-                    break;
-                }
-                rouletPosForMember += chromosome.getValue(graph);
+            else {
+                result.add(b);
             }
-            if (removeAt != -1) oldPopulation.remove(removeAt);
         }
         return result;
     }
