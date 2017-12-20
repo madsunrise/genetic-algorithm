@@ -8,7 +8,6 @@ import java.util.*;
 class GeneticUtils {
     private static final double MUTATIONS_PROBABILITY = 0.1;
 
-    private static final double pBest = 0.2;
     private static final double ALIVE_PROPOTION = 0.5;
 
     GeneticUtils(List<List<Integer>> graph) {
